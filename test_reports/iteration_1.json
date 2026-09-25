@@ -1,0 +1,45 @@
+{
+  "summary": "Comprehensive test of Nurse Orbit MVP (Full-stack: FastAPI + Expo/React Native). Ran 26 backend pytest tests across all endpoint groups — 26/26 passed after 3 test-side fixes. Backend AI Nurse SSE streaming with Claude Sonnet 5 via emergentintegrations works (delta + done events observed), Object Storage document upload works (persisted 200 with attached file), all CRUD flows (auth, questions, exams, abroad, passport, CME, jobs, news, notifications) verified. Frontend UI end-to-end tested: welcome → signup → 4-step onboarding → home dashboard → tab navigation (Study, Exams, Abroad, Passport) → profile → logout → back to welcome. Auth guard, testID coverage (opt-role-*, opt-qualification-*, opt-country-*, opt-goal-*, hero-status-card, continue-learning, career-goal, profile-btn, logout-btn) all confirmed present. No deprecated Expo packages detected (no expo-av / expo-barcode-scanner / expo-background-fetch). No red screens, no runtime errors. Only cosmetic 'shadow* deprecated, use boxShadow' warnings from react-native-web. Minor testID mismatch: ai-send-btn documented but actual is ai-send.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/home/dashboard", "issue": "career_goal.country is derived from user.goal (migration target) not user.country. Semantically correct but the field name/onboarding label is confusing — the 4th onboarding step key is 'goal' but its value drives the 'target country' shown on home. Consider renaming to target_country or clarifying."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "app/ai-nurse.tsx send button", "issue": "Send button testID is 'ai-send' but review request documents 'ai-send-btn'. Recommend renaming to ai-send-btn for consistency with rest of app conventions (login-submit-btn, signup-submit-btn, onboarding-next-btn).", "testID": "ai-send", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "(tabs)/_layout.tsx bottom tab bar", "issues": ["Custom emoji/glyph icons ⌂ ✎ ✈ 🛡 vary in visual weight and clarity vs 📚. Consider using a consistent icon set (e.g., @expo/vector-icons Ionicons) for uniform rendering across platforms and better accessibility."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/conftest.py",
+    "/app/backend/tests/test_backend.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Rename ai-send testID to ai-send-btn for consistency with other submit buttons.",
+    "(Optional) Replace bottom-tab emoji glyphs with @expo/vector-icons for consistent icon rendering.",
+    "(Optional) Clarify onboarding 'goal' → home 'career_goal.country' semantic mapping (either rename backend field or the onboarding option labels)."
+  ],
+  "critical_code_review_comments": [
+    "server.py file is 660 lines — approaching the 700-line split threshold. Consider modularizing routers (auth.py, study.py, passport.py, ai.py) before it grows further.",
+    "server.py uses @app.on_event('startup'/'shutdown') which is deprecated in FastAPI 0.100+ — prefer lifespan context manager (already imported asynccontextmanager but not used).",
+    "server.py:473 mutates a dict then pops _id after it was already inserted; benign but doc.pop('_id', None) after insert_one is a common footgun — the dict was mutated by motor. Currently safe because we also pop storage_path.",
+    "put_object/get_object use blocking requests library wrapped in run_in_threadpool — acceptable but consider httpx.AsyncClient for consistency with async stack.",
+    "AI stream: no auth on GET /api/passport/documents/{doc_id}/file if token missing → 401, good. But token via query string exposes JWT in server access logs — acceptable trade-off for <img> tag usage; document this."
+  ],
+  "updated_files": [
+    "/app/backend/tests/conftest.py (new)",
+    "/app/backend/tests/test_backend.py (new)"
+  ],
+  "success_rate": {"backend": "100% (26/26)", "frontend": "100% of tested flows (welcome→signup→onboarding→home→tabs→profile→logout)"},
+  "seed_data_creation": "Created ephemeral test users via signup with @example.com emails; test data prefixed TEST_ and cleaned up in-test where possible.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend fully validated at /app/backend/tests/test_backend.py. Reuse conftest.py fixtures (test_user, auth_headers, onboarded_user). NOTE: pydantic EmailStr rejects .test TLD — use @example.com for test emails. NOTE: multipart POSTs must NOT go through the shared session (which sets Content-Type: application/json); use requests directly. NOTE: home dashboard career_goal.country = user.goal (target country) not user.country. AI streaming test takes ~5-10s (real Claude Sonnet 5 call). Frontend AI send button testID is 'ai-send' not 'ai-send-btn'."
+}

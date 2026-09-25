@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Nurse Orbit favicon</title>
+  <desc id="desc">A teal orbital ring and white nursing cross on a dark navy square.</desc>
+  <defs>
+    <linearGradient id="background" x1="60" y1="40" x2="462" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B2640"/>
+      <stop offset="1" stop-color="#051423"/>
+    </linearGradient>
+    <linearGradient id="orbit" x1="110" y1="141" x2="402" y2="365" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9AF6E6"/>
+      <stop offset=".5" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#background)"/>
+  <ellipse cx="256" cy="256" rx="174" ry="89" transform="rotate(-25 256 256)" fill="none" stroke="url(#orbit)" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="94" fill="#0B857B"/>
+  <path d="M239 190c0-7 6-13 13-13h8c7 0 13 6 13 13v44h44c7 0 13 6 13 13v8c0 7-6 13-13 13h-44v44c0 7-6 13-13 13h-8c-7 0-13-6-13-13v-44h-44c-7 0-13-6-13-13v-8c0-7 6-13 13-13h44z" fill="#F8FFFE"/>
+  <circle cx="124" cy="173" r="12" fill="#A7F3E9"/>
+</svg>

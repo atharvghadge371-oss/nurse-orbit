@@ -1,0 +1,178 @@
+{
+  "app_name": "Nurse Orbit",
+  "personality": "1 iOS-Native Clean",
+  "personality_one_liner": "A premium, long-term digital career companion that feels exceptionally professional, trustworthy, and native to the OS.",
+  "color": {
+    "surface": "#FFFFFF",
+    "onSurface": "#0F172A",
+    "surfaceSecondary": "#F8FAFC",
+    "onSurfaceSecondary": "#334155",
+    "surfaceTertiary": "#F1F5F9",
+    "onSurfaceTertiary": "#475569",
+    "surfaceInverse": "#0F172A",
+    "onSurfaceInverse": "#F8FAFC",
+    "brand": "#0A1931",
+    "brandPrimary": "#1E3A8A",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#0D9488",
+    "onBrandSecondary": "#FFFFFF",
+    "brandTertiary": "#E0F2FE",
+    "onBrandTertiary": "#0369A1",
+    "success": "#10B981",
+    "onSuccess": "#FFFFFF",
+    "warning": "#F59E0B",
+    "onWarning": "#FFFFFF",
+    "error": "#EF4444",
+    "onError": "#FFFFFF",
+    "info": "#3B82F6",
+    "onInfo": "#FFFFFF",
+    "border": "#E2E8F0",
+    "borderStrong": "#CBD5E1",
+    "divider": "#F1F5F9",
+    "muted": "#64748B",
+    "onBrand": "#FFFFFF"
+  },
+  "typography": {
+    "displayFontFamily": "Plus Jakarta Sans",
+    "textFontFamily": "Plus Jakarta Sans",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous spacing. Do not cramp content. Use 'md' or 'lg' between list items and inner card paddings.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": "1",
+  "navigation": "bottom_tabs",
+  "icon_set": "Ionicons",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Bottom tab bar background",
+      "Sticky headers over scrollable feeds",
+      "Upload FAB (Floating Action Button) in Passport tab"
+    ],
+    "dont's": [
+      "Do not use on regular data cards or form fields",
+      "Do not use on error or warning alerts"
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Onboarding",
+      "purpose": "A 5-step flow capturing role, qualification, country, and goal.",
+      "states": {
+        "loading": "Subtle loading spinner overlaid on active state.",
+        "empty": "N/A",
+        "error": "Standard alert toast using surfaceInverse if validation fails."
+      },
+      "layout": "Full-width pagination. Bold display title at the top left. Large, touchable radio cards (flexWrap) for selection. Primary 'Next' CTA is sticky at the bottom."
+    },
+    {
+      "name": "Home",
+      "purpose": "Personalized dashboard highlighting professional status and quick links.",
+      "states": {
+        "loading": "Skeleton cards mimicking the status banner and grid.",
+        "empty": "Prompt to 'Set up your Professional Passport' in the hero card.",
+        "error": "Error loading status with a 'Tap to Retry' muted button."
+      },
+      "layout": "A large 'Hero Card' at the top with a subtle gradient (brandPrimary to brand), displaying active licenses, BLS, and a circular CME progress indicator. Below it, a 2-column flex-wrap grid for quick menu items (Jobs, Languages, AI Nurse)."
+    },
+    {
+      "name": "Study",
+      "purpose": "Nursing Academy containing structured learning modules.",
+      "states": {
+        "loading": "List of skeleton subject rows.",
+        "empty": "No enrolled courses. CTA: 'Explore Academy'.",
+        "error": "Failed to load courses. 'Retry' button."
+      },
+      "layout": "Top scrolling segmented control for categories (Year 1-4, Post Basic, Specialties). A vertical list of large cards for each Subject. Cards feature an abstract photo or tinted icon on the left, title, and a small horizontal progress bar."
+    },
+    {
+      "name": "Exams",
+      "purpose": "Question Bank and Exam Center for global licensing.",
+      "states": {
+        "loading": "Spinner centered on screen.",
+        "empty": "No exams selected yet.",
+        "error": "Cannot fetch question bank. 'Refresh' button."
+      },
+      "layout": "Two top tabs: 'Question Bank' and 'Exam Center'. Question Bank uses a 2-col grid for 6 mode tiles (Practice, Timed, Mock, etc.). Exam Center uses a vertical list of countries (UAE, UK, USA) featuring flag thumbnails and brief exam descriptions."
+    },
+    {
+      "name": "Abroad",
+      "purpose": "Step-by-step career pathway visualizer.",
+      "states": {
+        "loading": "Pathways loading...",
+        "empty": "No pathways bookmarked.",
+        "error": "Error loading pathways."
+      },
+      "layout": "A vertical roadmap (stepper) with nodes and connecting lines. Past steps are 'success' green, active step is 'brandPrimary', future steps are 'muted' gray. Sticky CTA at the bottom: 'Continue Pathway'."
+    },
+    {
+      "name": "Passport",
+      "purpose": "Secure document vault with expiry alerts.",
+      "states": {
+        "loading": "Skeleton rows of documents.",
+        "empty": "Illustration of a safe/wallet. Text: 'Your vault is empty.' CTA: 'Upload Document'.",
+        "error": "Failed to sync documents."
+      },
+      "layout": "Wallet-style dashboard. Top section shows 'Alerts' horizontally for EXPIRING SOON (warning) or EXPIRED (error). Main section is a vertical list of documents grouped by category. Uses status badges on each row. A glass FAB at bottom right to add new."
+    }
+  ],
+  "images": {
+    "nurse_hero": {
+      "url": "https://images.unsplash.com/photo-1594824476967-48c8b964273f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBudXJzZSUyMHBvcnRyYWl0fGVufDB8fHx8MTc4ODgxNTQ3M3ww&ixlib=rb-4.1.0&q=85",
+      "alt": "Professional nurse with arms crossed"
+    },
+    "study_academy": {
+      "url": "https://images.unsplash.com/photo-1651804810223-6997a7d3fe7c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzd8MHwxfHNlYXJjaHwyfHxudXJzaW5nJTIwc3R1ZGVudCUyMHN0dWR5aW5nfGVufDB8fHx8MTc4ODgxNTQ3M3ww&ixlib=rb-4.1.0&q=85",
+      "alt": "Nursing student studying"
+    },
+    "medical_abstract": {
+      "url": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzN8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwc3RldGhvc2NvcGUlMjBhYnN0cmFjdHxlbnwwfHx8fDE3ODg4MTU0NzN8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Medical stethoscope abstract"
+    },
+    "world_map_abroad": {
+      "url": "https://images.unsplash.com/photo-1713098965471-d324f294a71d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHwxfHx3b3JsZCUyMG1hcCUyMGFic3RyYWN0fGVufDB8fHxibHVlfDE3ODg4MTU0NzN8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Blue world map for international pathways"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the color palette. Note that the 'brand' color is deep navy as explicitly requested by the user, breaking the standard negative prompt rule for blue, due to specific user request.",
+    "Use 'Plus Jakarta Sans' for text; it provides a highly professional, readable experience, especially for medical data and exam numbers.",
+    "Maintain the iOS-Native Clean layout principles: generous paddings, clear visual hierarchy, soft md/lg radiuses on cards.",
+    "Ensure every screen has an empty, loading, and error state properly aligned (flex: 1).",
+    "In the 'Abroad' tab, implement a vertical stepper using flex-direction: column and border-left lines to simulate the roadmap (e.g., the 10-step Germany pathway).",
+    "In the 'Passport' tab, prominently display semantic status badges: 'ACTIVE' (success), 'EXPIRING SOON' (warning), 'EXPIRED' (error), and 'MISSING' (muted or outline).",
+    "Ensure the hero card in 'Home' utilizes a gradient from brand to brandPrimary and includes a circular progress indicator for CME."
+  ]
+}

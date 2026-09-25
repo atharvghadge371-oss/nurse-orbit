@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Nurse Orbit app icon</title>
+  <desc id="desc">A teal orbital ring surrounding a nursing cross on a dark navy background.</desc>
+  <defs>
+    <linearGradient id="background" x1="120" y1="80" x2="904" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B2640"/>
+      <stop offset="1" stop-color="#051423"/>
+    </linearGradient>
+    <linearGradient id="orbit" x1="210" y1="258" x2="822" y2="764" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#99F6E4"/>
+      <stop offset=".48" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+    <linearGradient id="core" x1="392" y1="342" x2="647" y2="697" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#18B7A4"/>
+      <stop offset="1" stop-color="#0B766F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#background)"/>
+  <circle cx="512" cy="512" r="326" fill="#0A2035" opacity=".72"/>
+  <circle cx="512" cy="512" r="286" fill="none" stroke="#1B4058" stroke-width="2" opacity=".85"/>
+  <ellipse cx="512" cy="512" rx="344" ry="176" transform="rotate(-25 512 512)" fill="none" stroke="url(#orbit)" stroke-width="34" stroke-linecap="round"/>
+  <ellipse cx="512" cy="512" rx="344" ry="176" transform="rotate(-25 512 512)" fill="none" stroke="#D7FFFA" stroke-width="4" stroke-linecap="round" opacity=".65"/>
+  <circle cx="512" cy="512" r="191" fill="url(#core)"/>
+  <circle cx="512" cy="512" r="166" fill="none" stroke="#A7F3E9" stroke-width="3" opacity=".48"/>
+  <path d="M478 384c0-13 10-23 23-23h22c13 0 23 10 23 23v89h90c13 0 23 10 23 23v22c0 13-10 23-23 23h-90v90c0 13-10 23-23 23h-22c-13 0-23-10-23-23v-90h-90c-13 0-23-10-23-23v-22c0-13 10-23 23-23h90z" fill="#F7FFFE"/>
+  <circle cx="245" cy="314" r="23" fill="#8BFFF0"/>
+  <circle cx="775" cy="709" r="18" fill="#38BDF8"/>
+  <circle cx="772" cy="312" r="10" fill="#D8FFFA" opacity=".9"/>
+</svg>

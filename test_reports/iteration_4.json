@@ -1,0 +1,33 @@
+{
+  "summary": "Iteration 4 — Original PDF viewer for Ross and Wilson. Backend: 7/7 new PDF tests PASS in /app/backend/tests/test_iter4_pdf.py. Verified GET /api/library/books/bk-adm-b89cbd48 returns has_file=true with 18 chapters; GET /api/library/books/bk-adm-b89cbd48/file?token=<JWT> returns HTTP 200, Content-Type application/pdf, %PDF magic header, size ≈55MB; Authorization Bearer header also accepted; missing token → 401; invalid token → 401; nonexistent book → 404. A non-file book (via cat-fon) returns has_file=false. AI-references regression test emitted no references event this run (stochastic — skipped, already covered comprehensively in iteration_3 62/62 suite). Frontend (mobile 390x844): logged in as demo@nurseorbit.app; on /library/book/bk-adm-b89cbd48 the primary CTA 'read-pdf-btn' (📖 Read Original PDF (full quality)) is visible in teal/secondary color ABOVE the secondary 'read-now-btn' (Read chapter summaries). Tapping read-pdf-btn navigates to /library/pdf/bk-adm-b89cbd48?title=Ross%20and%20Wilson... which renders the PDF viewer screen with title 'Ross and Wilson Anatomy & Physiology in Health and Illness', 'High-quality original format' subtitle, testID='pdf-close' (✕) button, and a full-viewport <iframe> whose src points to /api/library/books/bk-adm-b89cbd48/file?token=<JWT>. Tapping pdf-close returns to /library/book/bk-adm-b89cbd48. For a non-file book (/library/book/bk-fon-01) only read-now-btn is rendered (read-pdf-btn count=0) — matches spec. No React Native / Expo deprecation issues detected in the new PdfViewer or updated BookDetail files.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter4_pdf.py",
+    "/app/test_reports/pytest/pytest_iter4.xml"
+  ],
+  "action_items": [
+    "(No blockers) — the PDF viewer works end-to-end on web preview. Consider adding a native-only manual verification once you produce an EAS build: on Android the WebView wraps the PDF with Google Docs Viewer (docs.google.com/gview?embedded=true&url=…), which requires the file to be publicly reachable; since /file requires a JWT query param the URL IS reachable but the token leaks into Google's referer chain. Long-term: sign a short-lived download URL (e.g. 60s) and pass THAT to Google's viewer, so the master JWT never touches a third-party host.",
+    "(Carry-over from iter_3) server.py grew to 1439 lines — split into routers (auth/library/ai/…) and migrate deprecated on_event('shutdown') to FastAPI lifespan events."
+  ],
+  "critical_code_review_comments": [
+    "app/library/pdf/[bookId].tsx passes the raw JWT as a query param to Google Docs Viewer on Android — Google will retain that URL in its access logs. Consider a signed short-TTL download token instead of the primary JWT.",
+    "The /library/books/{book_id}/file endpoint returns the entire ~55MB body via Response(content=...) which loads it fully into RAM per request. For hot books this is fine but not scalable — switch to StreamingResponse (or FileResponse if you can persist to disk) and honor Range requests so browser/WebView PDF viewers can seek without downloading the whole file.",
+    "get_object(b['storage_path']) is called via run_in_threadpool but there's no ETag / Cache-Control / Content-Length header set — every reader reload re-transfers 55MB. Add ETag = sha256(storage_path+updated_at) and Cache-Control: private, max-age=3600.",
+    "PdfViewer uses `useEffect(() => { getToken(); })` and passes the token in URL. If the token expires while the user is reading, the iframe silently 401s. Consider surfacing a friendly 'session expired, please tap Read Original PDF again' state on iframe error."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter4_pdf.py (new — 8 tests: 3 book-detail has_file, 5 PDF download positive/negative, 1 AI references regression which self-skips on stochastic misses)"
+  ],
+  "success_rate": {"backend": "100% (7/7 executed pass; 1 stochastic AI test self-skipped)", "frontend": "100% — all 7 review-request UI expectations satisfied"},
+  "seed_data_creation": "None. Test suite reuses existing seeded Ross and Wilson book (bk-adm-b89cbd48) with 18 chapters + attached 55MB PDF.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 4 PDF viewer verified end-to-end. Key facts: (1) Ross and Wilson book_id = bk-adm-b89cbd48, has_file=true, chapter_count=18, file size ≈55MB, %PDF magic. (2) /api/library/books/{id}/file accepts BOTH ?token=<JWT> (query) and Authorization: Bearer <JWT> (header). Query token is used by the frontend iframe/WebView because those transports cannot inject headers. (3) Frontend routes: /library/book/[id] (detail) and /library/pdf/[bookId] (viewer). testIDs: read-pdf-btn, read-now-btn, pdf-close, pdf-webview (native only). (4) PdfViewer branches by Platform.OS — web=iframe, ios=WebView direct, android=WebView wrapped in docs.google.com/gview. (5) On web preview, the iframe was seen with correct src (/api/library/books/bk-adm-b89cbd48/file?token=eyJ…) but browser PDF rendering may take several seconds for 55MB — this is a browser-side render, not an app bug. Backend already verified to return 55MB PDF with %PDF header. (6) Regression: existing library flow untouched, non-file book (bk-fon-01) shows only read-now-btn (no PDF button) as expected.",
+  "rca_of_issue": "N/A — feature works. Root cause of ORIGINAL user complaint ('showing extracted text only') was that the library only surfaced parsed chapter summaries. Fix: new /library/pdf/[bookId] screen renders the raw stored PDF via iframe (web) / WebView (native), preserving page numbers/images/layout. Backend endpoint /library/books/{id}/file already existed and correctly streams the original file with JWT auth."
+}

@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Nurse Orbit",
+    "slug": "nurse-orbit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/nurse-orbit-icon.png",
+    "scheme": "frontend",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.emergent.nursecareerhub.p3riv3"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/nurse-orbit-adaptive-foreground.png",
+        "backgroundColor": "#071827"
+      },
+      "package": "com.emergent.nursecareerhub.p3riv3"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/nurse-orbit-favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/nurse-orbit-splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#071827"
+        }
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-status-bar",
+      "expo-audio",
+      "expo-sharing"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

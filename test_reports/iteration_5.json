@@ -1,0 +1,35 @@
+{
+  "summary": "Iteration 5 — AI Nurse Tutor NICKNAME + TONE feature verified end-to-end. Backend: 6/6 pytest cases PASS in /app/backend/tests/test_iter5_persona.py: (1) login demo@nurseorbit.app returns 200 + JWT; (2) GET /auth/me returns ai_name and ai_tone fields; (3) PUT /auth/profile with {ai_name:'Nurse Meera',ai_tone:'funny'} persists and is returned on next /auth/me; (4) POST /ai/chat SSE reply for 'Introduce yourself in one sentence' contains 'Nurse Meera' (persona injection at server.py:731-745 works — actual reply captured: \"Hi Priya, I'm Nurse Meera — your slightly witty nursing tutor here to make pharmacology and pathophysiology stick (without putting you to sleep)! 😊\"); (5) Textbook-style formatting (## headings + bullets) is present on a substantive question (pneumonia); (6) Switching persona to Buddy/strict is reflected in the very next reply. Frontend (390x844 mobile viewport): logged in as demo user → redirected to /home; AI tab header shows a '🤖 Name' button (data-testid='ai-persona') alongside 'New'; tapping it navigates to /tools/ai-persona which renders the nickname input (data-testid='persona-name'), exactly 7 name suggestion chips (Nurse Meera, Buddy, Tutor Sam, Sister Jane, Nurse Priya, Coach, Doc), and 4 tone cards (Warm/Funny/Strict/Neutral, testIDs persona-tone-*); typing 'Nurse Priya', tapping the Funny tone card, and tapping 'Save persona' (data-testid='persona-save') successfully returns the user to /ai-tab (persona PUT succeeded and screen popped back). Profile tab shows 'AI Nurse persona' as the FIRST menu row (data-testid='p-menu-AI-Nurse-persona', y=349, above My Health/Career Development/Translator/Nursing Library/Notifications/About). All 11 review-request checks pass.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter5_persona.py",
+    "/app/test_reports/pytest/pytest_iter5.xml"
+  ],
+  "action_items": [
+    "(No blockers) All Wave 1 persona checks pass. Consider these small improvements for Wave 2:",
+    "1. On web preview, React Native Alert.alert renders as an in-app modal, so the success confirmation on Save persona is invisible to browser-level dialog listeners. Not a bug (native works), but for a11y/testability consider replacing with a Toast or an inline success banner that has testID='persona-save-success'.",
+    "2. When the user asks for 'one sentence' the model correctly overrides the textbook-format instruction and returns a plain intro (this is desirable). Nothing to fix.",
+    "3. Carry-over from earlier iterations: server.py is now 2749 lines — split into routers (auth/library/ai/persona) and migrate deprecated on_event('shutdown') to FastAPI lifespan events.",
+    "4. Minor: Expo web logs a repeated warning '\"shadow*\" style props are deprecated. Use \"boxShadow\"' — some component (likely a card / hero shadow) still uses shadowColor/shadowOffset/shadowRadius directly. Not blocking but should be migrated for RN Web 0.19+ compatibility."
+  ],
+  "critical_code_review_comments": [
+    "server.py line 732: `(user.get('ai_name') or 'Nurse AI').strip() or 'Nurse AI'` is good — safely handles empty strings. However, ProfileUpdateBody does not validate ai_name length or ai_tone enum values, so a client could POST {ai_name: '<250-char string>', ai_tone: 'evil'} and it would be persisted verbatim and injected into every future system prompt. Consider adding `Field(min_length=1, max_length=40)` for ai_name and `Literal['warm','funny','strict','neutral']` for ai_tone in ProfileUpdateBody (server.py:258-265).",
+    "The persona line is prepended to the system prompt on every /ai/chat call, so it takes effect even for existing session_ids (good — tested and confirmed by test 6 where Buddy took over the next message). No caching issue.",
+    "Frontend api.updateProfile is fire-and-forget from ai-persona.tsx — the user state in the auth store is not refreshed after PUT, so the profile tab still shows the OLD ai_name until reload. Wave 2: after save, call `refreshMe()` / update the store so the persona screen shows current name on re-entry."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter5_persona.py (new — 6 tests covering login, persona persistence, SSE nickname injection Meera + Buddy, textbook-format on substantive answer, teardown)"
+  ],
+  "success_rate": {"backend": "100% (6/6 pass)", "frontend": "100% (11/11 review-request checks pass)"},
+  "seed_data_creation": "None. Uses existing demo user demo@nurseorbit.app. Teardown restores ai_name='Nurse AI', ai_tone='warm'.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 5 (AI persona Wave 1) verified. Key facts: (1) Backend persona injection lives in server.py:731-745 inside the /api/ai/chat SSE handler — reads user.ai_name / user.ai_tone with sensible defaults and prepends persona_line + format_line to the system prompt. (2) public_user (server.py:153-170) exposes ai_name (default 'Nurse AI') and ai_tone (default 'warm'). (3) PUT /api/auth/profile accepts partial updates including ai_name/ai_tone (ProfileUpdateBody at server.py:258-265). (4) Frontend screens: /tools/ai-persona (testIDs: persona-back, persona-name, persona-sugg-<name>, persona-tone-<key>, persona-save). AI tab header button testID='ai-persona' (label '🤖 Name'). Profile menu first row testID='p-menu-AI-Nurse-persona'. (5) Tone keys: warm | funny | strict | neutral — persona_line uses tone_desc lookup with 'warm' fallback. (6) SSE endpoint /api/ai/chat streams `data: {\"delta\":\"...\"}` events and terminates on StreamDone (does NOT emit a `{\"done\":true}` message — tests handle both patterns via iter_lines fallback). (7) Alert.alert on web renders as in-app modal — browser dialog listeners will NOT fire; verify save via navigation state instead.",
+  "rca_of_issue": "N/A — feature works. Original bug ('student should be able to call any nickname for the nurse AI chatbot') was fixed by (a) adding ai_name/ai_tone columns to the user document via ProfileUpdateBody, (b) surfacing them in public_user, (c) building the /tools/ai-persona screen with 7 preset chips + 4 tone cards, (d) injecting `You are '<ai_name>'…tone is <tone_desc>` into the /ai/chat system prompt, and (e) placing an obvious '🤖 Name' entry point in both the AI tab header and as the top row of the Profile menu. Verified end-to-end: setting ai_name='Nurse Meera' and asking the AI to introduce itself yields a reply that self-identifies as 'Nurse Meera'; switching to 'Buddy' immediately switches the persona in the next reply."
+}

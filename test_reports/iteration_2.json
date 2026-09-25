@@ -1,0 +1,38 @@
+{
+  "summary": "Iteration 2 — Nursing Library module (backend + frontend). All 15 new backend library tests PASS (100% — total suite now 26+15=41). Verified: 26 categories with book_count, book listing + category/q filter, featured (featured/recent/continue_reading/bookmarked), book detail with TOC-only chapters (no content leak), chapter fetch with notes+is_bookmarked and reading-progress update, bookmark toggle idempotency, notes create+delete flow, library full-text search (heparin returns book+chapter hits with snippet), admin RBAC (403 for non-admin on POST/PUT/DELETE), admin create-and-delete book flow with chapter_count/page_count auto-calc, regular signup does NOT get is_admin=true, AI /api/ai/chat SSE emits 'references' event BEFORE 'done' for 'Explain heparin monitoring' with book_id/chapter/book_title/author/chapter_title fields and persists references on assistant message. Frontend UI verified end-to-end via Playwright mobile viewport (390x844): demo login → /library shows 26 category cards + Featured/Recent horizontal rows + search box (lib-admin-btn correctly hidden for non-admin) → Pharmacology category → book detail (Read Now, TOC, bookmark) → reader (prev/next, TOC modal opens 4 chapters, font-, font+, add-note, ask-ai, bookmark, in-book search all present) → /library/search with 'heparin' returns 2 books + hits.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "reader body", "issue": "Console error observed while rendering chapter body: 'Unexpected text node: . A text node cannot be a child of a <View>.' — likely a stray whitespace between two JSX elements inside a <View> (candidates: the header row in read/[bookId].tsx around iconBtn siblings, or the chapters mapping in book/[id].tsx). Not a red screen, but should be cleaned up.", "testID": "reader-toc / read-now-btn area", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "library/index.tsx", "issues": ["Category grid uses width: '31.7%' with margin:4 — visually fine on 390px viewport, but on narrower screens (<360px) 3 columns may wrap oddly. Consider fixed columnCount via width: '32%' or flex-basis. Category card colors are provided in seed but ensure white text on lighter category.color values keeps AA contrast (some seed colors may be too light for #FFF)."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_library.py",
+    "/app/backend/tests/test_backend.py",
+    "/app/backend/tests/conftest.py",
+    "/app/test_reports/pytest/pytest_library.xml"
+  ],
+  "action_items": [
+    "(LOW) Investigate & fix 'Unexpected text node' React Native warning triggered on reader/book-detail screens. Look for whitespace/newlines directly inside <View> tags (usually between mapped children or between conditional blocks and closing tags).",
+    "(Optional) Consider CDN thumbnail sizing for book covers — expo-image on web downloads full-resolution unsplash images; provide ?w=200 querystring on cover_image for faster horizontal-row rendering."
+  ],
+  "critical_code_review_comments": [
+    "server.py is now 1051 lines — well past the 700-line soft cap. Recommend splitting into routers: auth.py, study.py, questions.py, exams.py, abroad.py, passport.py, cme.py, jobs_news.py, notifications.py, ai.py, library.py, library_admin.py. Also move _library_matches + LIB_INDEX into library.py.",
+    "library_data.py chapter content is stored embedded on book documents. For future scaling, consider a separate lib_chapters collection with an index on (book_id, number). Currently every /library/books/{id} fetch pulls all chapter bodies from Mongo just to build TOC — _book_detail should project chapters to {number,title} only.",
+    "@app.on_event startup remains — still deprecated (already flagged in iteration_1). Bootstrapping the library at startup makes migration to lifespan more important now.",
+    "admin_edit_book uses body.dict() (Pydantic v1 style) — on Pydantic v2 body.model_dump() is preferred (v1 dict() still works via warning).",
+    "library_search does substring search with .lower() on every chapter for every request; for 17 books this is fine but O(N * chapters) — plan to move to Mongo text index or the LIB_INDEX already built via build_search_index."
+  ],
+  "updated_files": ["/app/backend/tests/test_library.py (new)"],
+  "success_rate": {"backend": "100% (15/15 library tests, 41/41 total)", "frontend": "100% of tested flows (login → library index → category → book detail → reader → library search)"},
+  "seed_data_creation": "Bootstrap seed of 26 categories + 17 books auto-inserted on backend startup. Test suite creates ephemeral test users (@example.com), a TEST admin book (deleted in same test), and TEST notes/bookmarks (cleaned up in-test).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Library tests in /app/backend/tests/test_library.py (reuse conftest.py fixtures session/test_user/auth_headers). Admin login: admin@nurseorbit.app / admin12345 auto-grants is_admin via ADMIN_EMAIL env. AI references event verified with question 'Explain heparin monitoring' → emits {'references': [...]} SSE event BEFORE {'done': True}. Frontend welcome screen testIDs are 'get-started-btn' & 'login-link-btn' (NOT 'welcome-login'); login form uses login-email-input/login-password-input/login-submit-btn. Reader screen testIDs verified: prev-chapter, next-chapter, reader-toc, font-decrease, font-increase, add-note-btn, ask-ai-btn, reader-bookmark, reader-search, toc-mod-{n}, note-input, note-save, reader-search-input. Library index uses lib-cat-{cat_id} (26 cats), lib-search-btn, lib-admin-btn (admin-only), lib-book-{id}. Category screen uses catbook-{id}. Book detail uses toc-{n}, book-bookmark, read-now-btn. Non-admin gets 403 on all /library/admin/* endpoints and doesn't see lib-admin-btn in UI.",
+  "rca_of_issue": "N/A — no functional bugs. Only cosmetic React Native warning ('Unexpected text node') on reader/book-detail views; harmless but should be cleaned up by removing stray whitespace between JSX siblings inside <View>."
+}

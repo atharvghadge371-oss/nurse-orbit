@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Nurse Orbit adaptive app icon foreground</title>
+  <desc id="desc">A compact teal orbital ring surrounding a nursing cross on a transparent background.</desc>
+  <defs>
+    <linearGradient id="orbit" x1="250" y1="324" x2="770" y2="700" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A7F3E9"/>
+      <stop offset=".5" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="core" x1="403" y1="380" x2="624" y2="643" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1AC2AD"/>
+      <stop offset="1" stop-color="#087A73"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="512" cy="512" rx="294" ry="147" transform="rotate(-25 512 512)" fill="none" stroke="url(#orbit)" stroke-width="32" stroke-linecap="round"/>
+  <ellipse cx="512" cy="512" rx="294" ry="147" transform="rotate(-25 512 512)" fill="none" stroke="#E6FFFB" stroke-width="3" opacity=".58"/>
+  <circle cx="512" cy="512" r="163" fill="url(#core)"/>
+  <circle cx="512" cy="512" r="142" fill="none" stroke="#B9FFF5" stroke-width="3" opacity=".48"/>
+  <path d="M483 405c0-11 9-20 20-20h18c11 0 20 9 20 20v75h76c11 0 20 9 20 20v18c0 11-9 20-20 20h-76v76c0 11-9 20-20 20h-18c-11 0-20-9-20-20v-76h-76c-11 0-20-9-20-20v-18c0-11 9-20 20-20h76z" fill="#F8FFFE"/>
+  <circle cx="282" cy="348" r="18" fill="#A7F3E9"/>
+  <circle cx="741" cy="676" r="15" fill="#38BDF8"/>
+</svg>

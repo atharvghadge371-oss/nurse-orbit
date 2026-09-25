@@ -1,0 +1,50 @@
+{
+  "summary": "Iteration 3 — AI Nursing Companion redesign. Backend: 21/21 new tests PASS in /app/backend/tests/test_iter3_features.py — verified widened onboarding (user_type/program/year/language/focus_areas), /auth/me returns is_admin + focus_areas, /drugs (10) + detail with 8 sections + disclaimer, /ecg/cases + case with options and answer field, /abg/interpret returns 'Respiratory Acidosis' + compensation + causes for pH 7.28/PaCO2 60/HCO3 24, /ventilator/topics (3), /skills (5) + detail w/ indications/equipment/procedure, /emergency/topics (8) with key_points, /cases (5) + detail with NO correct-answer/why leak in options, /cases/attempt returns correct+why+priority, /nursing-diagnosis returns AI-generated JSON with diagnoses/goals/interventions/rationales/evaluation/disclaimer, /care-plans POST with ai_generate=true fills missing fields via AI + list + delete flow works, /gamification returns xp/streak/level/badges/daily_goal and /gamification/action increments XP, /ai/chat mode=QUICK returns materially shorter body than mode=CLINICAL for the same prompt, /ai/chat streams SSE 'references' event citing book_id bk-adm-b89cbd48 (Ross and Wilson) for 'Explain heart anatomy from Ross and Wilson', Ross and Wilson book has 18 chapters and appears in /library/books?category_id=cat-anp. Frontend (mobile 390x844): welcome→login (demo@nurseorbit.app/password123) succeeds; /home shows 'AI Nursing Companion' brand + greeting 'Good morning, Priya' + gamification strip (XP/Streak 🔥/Level/Today's goal 0/10) + Continue Learning card (Pharmacology · 68%) + Ask Nurse AI card + 12-feature Explore grid + Today's Challenge; 5-tab bar Home|Learn|AI(center circle 🤖)|Practice|Profile renders correctly; AI tab shows 4 mode chips visible (Simple/Student/Clinical/Exam) with QUICK present in code but off-screen to the right (horizontal scroll); 6 suggested prompts; ai-send button visible; /abg calculator returned 'Respiratory Acidosis' with compensation for 7.28/60/24 (inputs lack testIDs — filled by index); /drug-guide lists 10 drugs incl. Metoprolol/Furosemide/Heparin/etc with search input; /cases lists 5 cases with difficulty chips (Beginner/Intermediate); /emergency lists all 8 topics with 'Ask AI to walk me through' buttons; /clinical-skills lists 5 skills; /care-plans empty state + FAB (+); /nursing-diagnosis textarea + generate button; profile tab shows user chips (BSc Nursing · India), gamification (0 XP · 0 Streak · L1 · 0 Badges), menu with Library/Passport/CME/Care Plans/Jobs/News/Notifications.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/ecg/cases/{id}", "issue": "Field is named 'answer' (single string) not 'answer_index' as the review request describes. Options are plain strings, no per-option correct/why. Educational contract-drift only — cases render fine on client."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "(tabs)/ai-tab.tsx mode chips", "issue": "5 modes are defined (SIMPLE/STUDENT/CLINICAL/EXAM/QUICK) but the horizontal ScrollView shows only 4 chips on 390px viewport; QUICK is not visible without a horizontal swipe and there is no visible scroll indicator. Consider wrapping to 2 rows or shrinking chip padding so all 5 fit on a 375-390px screen.", "testID": "mode-QUICK", "priority": "MEDIUM"},
+      {"component": "app/abg.tsx inputs", "issue": "pH, PaCO2, HCO3, PaO2, SaO2 TextInputs have NO testID (only abg-back / abg-interpret / abg-result exist). Automated testing has to fall back to input index. Recommend adding testID='abg-ph' | 'abg-paco2' | 'abg-hco3' | 'abg-pao2' | 'abg-sao2'.", "testID": "abg-ph/abg-paco2/abg-hco3", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "(tabs)/ai-tab.tsx", "issues": ["Mode chip row height=52 with paddingHorizontal 16 and chip icon+label — with 5 chips at ~90px each, the last chip clips on a 390px viewport. Either shrink chip minWidth or make the scroll edge fade obvious."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter3_features.py",
+    "/app/backend/tests/test_library.py",
+    "/app/backend/tests/test_backend.py",
+    "/app/backend/tests/conftest.py",
+    "/app/test_reports/pytest/pytest_iter3.xml"
+  ],
+  "action_items": [
+    "(MEDIUM) AI tab — make QUICK mode chip visible on first render: either wrap chips to 2 rows on <420px screens, or reduce chip padding so all 5 fit in one row. Alternatively add a subtle right-edge fade to signal horizontal scroll.",
+    "(LOW) Add testID to the 5 ABG TextInputs in app/abg.tsx (abg-ph, abg-paco2, abg-hco3, abg-pao2, abg-sao2) so automated tests don't rely on input index.",
+    "(LOW) ECG API contract — clarify: is the field 'answer' or 'answer_index'? Review request mentions 'answer index' but backend returns 'answer'. If intentional, update the review checklist; if not, add answer_index alongside for consistency with cases attempt semantics.",
+    "(Carry-over from iter_2) server.py is now ~1440 lines. Split into routers (auth/study/questions/exams/abroad/passport/cme/ai/library/library_admin/clinical/care_plans/gamification). Also move to FastAPI lifespan events (on_startup is deprecated)."
+  ],
+  "critical_code_review_comments": [
+    "server.py grew from 1051 → 1439 lines (past the 700-line soft cap) — hard split into routers is now overdue. Suggested modules: routers/{auth,onboarding,home,study,questions,exams,abroad,passport,cme,jobs_news,notifications,ai,library,library_admin,clinical,care_plans,gamification}.py. Bootstrapping (library seed, storage init) should move to a proper lifespan context manager.",
+    "AI endpoints (/nursing-diagnosis, /care-plans with ai_generate, /learning-plan/generate) all instantiate a fresh LlmChat per request and block on chat.send_message — no timeout, no retry, and no circuit-breaker. If the LLM stalls, the request hangs up to server keepalive. Wrap each in asyncio.wait_for(..., timeout=90) and return a friendly 504 on timeout.",
+    "server.py still uses Pydantic v1 style body.dict() in several places (save_onboarding, create_care_plan, admin_edit_book). On Pydantic v2 this emits deprecation warnings; migrate to body.model_dump().",
+    "Case attempt awards XP via _grant_xp but the response only returns {correct, why, priority} — the newly earned XP delta is not surfaced, so the UI cannot celebrate the reward without a follow-up /gamification GET. Consider returning xp_gained in the response.",
+    "ai_chat_stream persists the assistant message with 'references' after the stream completes, but if the client disconnects mid-stream the assistant record is still written with a partial 'content'. Wrap the persist step in a try/except that captures the client-disconnect exception and marks the record 'partial': True for observability.",
+    "/api/gamification/action accepts an arbitrary payload dict; validate with a Pydantic model (action: Literal['mcq_correct','lesson_read','case_correct','chapter_read','care_plan_saved']) so unknown actions don't silently award the default 2 XP."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter3_features.py (new — 21 tests covering onboarding widening, drugs, ecg, abg, ventilator, skills, emergency, cases (no leak), nursing-diagnosis AI, care-plans AI + CRUD, gamification, AI QUICK vs CLINICAL, AI Ross-and-Wilson references, Library Ross-and-Wilson cat-anp + 18 chapters)"
+  ],
+  "success_rate": {"backend": "100% (21/21 new + 41 existing = 62/62 total)", "frontend": "~95% — all critical screens render and are wired to backend; only issue is QUICK mode chip clipped in ai-tab on 390px viewport"},
+  "seed_data_creation": "No new persistent seed data. Test suite creates ephemeral test users (@example.com) and a temporary care plan (deleted in same test). Ross and Wilson book bk-adm-b89cbd48 with 18 chapters was already seeded by main agent.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iteration 3 test file: /app/backend/tests/test_iter3_features.py — reuses conftest.py (session, test_user, auth_headers, onboarded_user). Ross and Wilson book id constant: ROSSWILSON_BOOK_ID = 'bk-adm-b89cbd48'. AI streaming helper: _SSECollector.collect(url, payload, headers) returns (deltas, references, error) — use it for any new SSE tests. Note: ECG API returns 'answer' (str) not 'answer_index'. Care-plan AI generation may take 30-90s; keep timeout >=120s. Nursing-diagnosis AI expects EMERGENT_LLM_KEY; if AI stalls, all AI-mode/AI-reference tests will time out. Frontend testIDs verified: welcome uses get-started-btn / login-link-btn; login uses login-email-input / login-password-input / login-submit-btn; AI tab uses mode-SIMPLE/mode-STUDENT/mode-CLINICAL/mode-EXAM/mode-QUICK and ai-send. ABG inputs LACK testID — fall back to page.query_selector_all('input')[0..4]. Care plans FAB has no explicit testID (icon-only + button). Tabs bottom bar uses default Expo Router tab labels (no custom testID). New DB collections: care_plans, case_attempts, gamification, lib_progress, lib_bookmarks, lib_notes.",
+  "rca_of_issue": "N/A — 62/62 backend tests pass. Two minor frontend gaps: (1) AI-tab QUICK chip clipped on narrow viewport (medium-priority UX fix); (2) ABG input testIDs missing (test-only nuisance). Neither blocks the redesigned flows."
+}
